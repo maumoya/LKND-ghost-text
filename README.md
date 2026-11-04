@@ -1,4 +1,12 @@
-# 💣 LinkedIn Bomb
+<p align="center"><img src="docs/header.svg" alt="LKND Ghost Text: self-destructing LinkedIn messages" width="100%"></p>
+
+# 💣 LKND Ghost Text
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Open Source](https://img.shields.io/badge/open%20source-yes-brightgreen.svg)](https://github.com/maumoya/LKND-ghost-text)
+[![Privacy: no network calls](https://img.shields.io/badge/privacy-no%20network%20calls-success.svg)](SECURITY.md)
+[![Chrome MV3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](extension/manifest.json)
+[![Tests](https://img.shields.io/badge/tests-73%20passing-brightgreen.svg)](test/)
 
 A Chrome extension that sends self-destructing LinkedIn messages. Click 💣 next to send and pick
 **20s / 1m / 5m / 30m**. The message goes out with the line
@@ -8,12 +16,16 @@ side. At zero the extension edits **your own** message so it reads `💬💣💨
 If the chat is closed when the timer runs out, it opens the chat quietly in a background tab, makes
 the edit, and closes that tab.
 
-Owner and author: Mauricio Alonso Moya Tapia. Private, single-user tool.
+Author: Mauricio Alonso Moya Tapia. Not affiliated with, endorsed by or sponsored by LinkedIn.
+Use it within LinkedIn's terms; you are responsible for what you send.
 
 ## Install (Load unpacked)
 
-1. Open `chrome://extensions` and turn on **Developer mode**.
-2. Click **Load unpacked** and choose this repo's `extension/` folder.
+1. Download `lknd-ghost-text-v1.0.0.zip` from the
+   [latest release](https://github.com/maumoya/LKND-ghost-text/releases/latest) and unzip it
+   (or clone this repo).
+2. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and choose the
+   unzipped folder (or this repo's `extension/` folder).
 3. Open `https://www.linkedin.com/messaging/` and look for 💣 next to the send controls.
 
 ## Honest limits
@@ -51,3 +63,7 @@ npm test
 Tests use `node:test` and jsdom against a fixture recorded from the live page
 (`docs/DOM_NOTES.md`). All LinkedIn selectors live in `extension/lib/dom.js` (`SEL`), so a markup
 change is a one-line fix.
+
+## License
+
+[MIT](LICENSE). Security reports: see [SECURITY.md](SECURITY.md).

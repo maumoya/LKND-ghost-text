@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn Bomb",
-  "version": "0.1.0",
+  "name": "LKND Ghost Text",
+  "version": "1.0.0",
   "description": "Self-destructing LinkedIn messages: a timer turns your own message into 💬💣💨.",
   "permissions": ["storage", "alarms", "tabs"],
   "host_permissions": ["https://www.linkedin.com/messaging/*"],
@@ -15,7 +15,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "LinkedIn Bomb",
+    "default_title": "LKND Ghost Text",
     "default_icon": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
   },
   "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }

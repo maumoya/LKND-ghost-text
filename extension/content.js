@@ -132,10 +132,10 @@
     }
 
     const SAY = {
-      selector_missing: 'LinkedIn Bomb: could not find the message box. Nothing was sent.',
-      empty: 'LinkedIn Bomb: type a message first.',
-      attachment: 'LinkedIn Bomb: text only. Remove the attachment to send a bomb.',
-      send_not_seen: 'LinkedIn Bomb: the message did not appear as sent. Your text is back in the box, no timer started.',
+      selector_missing: 'LKND Ghost Text: could not find the message box. Nothing was sent.',
+      empty: 'LKND Ghost Text: type a message first.',
+      attachment: 'LKND Ghost Text: text only. Remove the attachment to send a bomb.',
+      send_not_seen: 'LKND Ghost Text: the message did not appear as sent. Your text is back in the box, no timer started.',
     };
 
     function toast(text) {
@@ -152,7 +152,7 @@
 
     // A send that did not happen is not silent: toast on the page, failed entry on the badge.
     function refuse(reason, text) {
-      toast(SAY[reason] || 'LinkedIn Bomb: ' + reason);
+      toast(SAY[reason] || 'LKND Ghost Text: ' + reason);
       if (reason !== 'empty') send({ type: 'sendFailed', reason, preview: (text || '').split('\n')[0].slice(0, 40) });
       return { ok: false, reason };
     }
