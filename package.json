@@ -5,6 +5,13 @@
   "description": "Self-destruct messages for LinkedIn messaging (owner-only Chrome extension).",
   "license": "UNLICENSED",
   "author": "Mauricio Alonso Moya Tapia",
-  "scripts": { "test": "node --test \"test/*.test.js\"" },
-  "engines": { "node": ">=20" }
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "jsdom": "30.1.3"
+  }
 }

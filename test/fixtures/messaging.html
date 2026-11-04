@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<body>
+<!-- Mock of LinkedIn messaging thread view. Fake names and text only. See docs/DOM_NOTES.md. -->
+<main class="msg-thread">
+  <ul class="msg-s-message-list-content">
+    <li>
+      <div class="msg-s-event-listitem msg-s-event-listitem--other" data-event-urn="urn:li:msg_message:(urn:li:fsd_profile:OTHER1,2-AAA)">
+        <div class="msg-s-event-listitem__message-bubble">
+          <p class="msg-s-event-listitem__body">Hi there from Test Person</p>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="msg-s-event-listitem" data-event-urn="urn:li:msg_message:(urn:li:fsd_profile:OWNER,2-BBB)">
+        <div class="msg-s-event-listitem__message-bubble">
+          <p class="msg-s-event-listitem__body">first own message</p>
+        </div>
+        <button class="msg-s-event-listitem__options-trigger artdeco-dropdown__trigger" type="button"></button>
+      </div>
+    </li>
+    <li>
+      <div class="msg-s-event-listitem" data-event-urn="urn:li:msg_message:(urn:li:fsd_profile:OWNER,2-CCC)">
+        <div class="msg-s-event-listitem__message-bubble">
+          <p class="msg-s-event-listitem__body">dup text</p>
+        </div>
+        <button class="msg-s-event-listitem__options-trigger artdeco-dropdown__trigger" type="button"></button>
+      </div>
+    </li>
+    <li>
+      <div class="msg-s-event-listitem" data-event-urn="urn:li:msg_message:(urn:li:fsd_profile:OWNER,2-DDD)">
+        <div class="msg-s-event-listitem__message-bubble">
+          <p class="msg-s-event-listitem__body">dup text</p>
+        </div>
+        <button class="msg-s-event-listitem__options-trigger artdeco-dropdown__trigger" type="button"></button>
+      </div>
+    </li>
+    <li>
+      <div class="msg-s-event-listitem" data-event-urn="urn:li:msg_message:(urn:li:fsd_profile:OWNER,2-EEE)">
+        <div class="msg-s-event-listitem__message-bubble">
+          <p class="msg-s-event-listitem__body">Already edited<span class="t-14 t-black--light t-normal pl1">(Edited)</span></p>
+        </div>
+        <button class="msg-s-event-listitem__options-trigger artdeco-dropdown__trigger" type="button"></button>
+      </div>
+    </li>
+  </ul>
+  <form class="msg-form">
+    <div class="msg-form__msg-content-container">
+      <div class="msg-form__contenteditable" contenteditable="true" role="textbox" aria-label="Write a message…"><p><br></p></div>
+    </div>
+    <footer class="msg-form__footer">
+      <button class="msg-form__footer-action" type="button" aria-label="Attach an image to your conversation"></button>
+      <button class="msg-form__footer-action" type="button" aria-label="Attach a file to your conversation"></button>
+      <button class="msg-form__footer-action emoji-hoverable-trigger" type="button" aria-label="Open Emoji Keyboard"></button>
+      <button class="msg-form__send-toggle" type="button" aria-label="Open send options"></button>
+    </footer>
+  </form>
+</main>
+</body>
+</html>
