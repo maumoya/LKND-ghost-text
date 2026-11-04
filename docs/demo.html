@@ -5,40 +5,40 @@
      drawn in a neutral chat style. Regenerate: make_demo.sh http://localhost:PORT/docs/demo.html assets/demo.gif -->
 <style>
   html,body{margin:0;height:100%;background:#0b1f33;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:#e6f3ff}
-  .stage{display:flex;height:100%;align-items:center;justify-content:center;gap:56px;padding:0 60px;box-sizing:border-box}
-  .side{width:330px}
-  .side h1{font-size:44px;margin:0 0 12px;color:#fff}
-  .side p{font-size:22px;color:#b8d4ee;margin:0 0 10px;line-height:1.35}
-  .step{font-size:22px;color:#7fa6c9;margin-top:26px;min-height:60px;transition:color .3s}
+  .stage{display:flex;height:100%;align-items:center;justify-content:center;gap:40px;padding:0 40px;box-sizing:border-box}
+  .side{width:420px}
+  .side h1{font-size:60px;margin:0 0 12px;color:#fff}
+  .side p{font-size:32px;color:#b8d4ee;margin:0 0 10px;line-height:1.35}
+  .step{font-size:34px;color:#9fd3fa;margin-top:30px;min-height:130px;line-height:1.3;transition:color .3s}
   .step b{color:#fff}
-  .win{width:640px;height:600px;background:#fff;border-radius:22px;box-shadow:0 20px 60px #0008;display:flex;flex-direction:column;overflow:hidden;color:#1d2226}
-  .head{padding:18px 24px;border-bottom:1px solid #e3e8ee;font-weight:700;font-size:20px;display:flex;gap:12px;align-items:center}
+  .win{width:700px;height:640px;background:#fff;border-radius:22px;box-shadow:0 20px 60px #0008;display:flex;flex-direction:column;overflow:hidden;color:#1d2226}
+  .head{padding:18px 24px;border-bottom:1px solid #e3e8ee;font-weight:700;font-size:26px;display:flex;gap:12px;align-items:center}
   .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#7fb3e6,#3f7fbf)}
   .list{flex:1;padding:22px 24px;display:flex;flex-direction:column;gap:14px;justify-content:flex-end}
-  .msg{max-width:78%;padding:12px 16px;border-radius:16px;font-size:19px;line-height:1.35}
+  .msg{max-width:80%;padding:14px 18px;border-radius:18px;font-size:27px;line-height:1.35}
   .them{background:#eef2f6;align-self:flex-start}
   .me{background:#3fa9f5;color:#fff;align-self:flex-end;position:relative;display:none}
-  .me .tag{display:block;font-size:15px;opacity:.9;margin-top:6px}
+  .me .tag{display:block;font-size:20px;opacity:.9;margin-top:6px}
   .me.boom{animation:boom .5s}
-  .edited{font-size:13px;opacity:.8;margin-left:8px;display:none}
+  .edited{font-size:18px;opacity:.8;margin-left:8px;display:none}
   @keyframes boom{0%{transform:scale(1)}40%{transform:scale(1.12);background:#ff6b6b}100%{transform:scale(1)}}
-  .ring{position:absolute;left:-62px;top:50%;transform:translateY(-50%);width:48px;height:48px;display:none}
-  .ring text{font:700 16px sans-serif;fill:#1d2226}
+  .ring{position:absolute;left:-90px;top:50%;transform:translateY(-50%);width:76px;height:76px;display:none}
+  .ring text{font:700 20px sans-serif;fill:#1d2226}
   .comp{border-top:1px solid #e3e8ee;padding:16px 20px;display:flex;gap:12px;align-items:center;position:relative}
-  .box{flex:1;min-height:30px;border:1px solid #cfd8e1;border-radius:12px;padding:10px 14px;font-size:19px}
+  .box{flex:1;min-height:30px;border:1px solid #cfd8e1;border-radius:12px;padding:10px 14px;font-size:24px}
   .caret{display:inline-block;width:2px;height:20px;background:#1d2226;vertical-align:-3px;animation:blink 1s steps(1) infinite}
   @keyframes blink{50%{opacity:0}}
   .bomb{font-size:28px;width:52px;height:52px;border-radius:50%;border:2px solid #cfd8e1;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s}
   .bomb.hot{border-color:#ff6b6b;transform:scale(1.15);box-shadow:0 0 0 6px #ff6b6b33}
-  .send{background:#3fa9f5;color:#fff;border-radius:20px;padding:10px 18px;font-weight:700;font-size:17px}
+  .send{background:#3fa9f5;color:#fff;border-radius:20px;padding:10px 18px;font-weight:700;font-size:22px}
   .menu{position:absolute;right:90px;bottom:84px;background:#fff;border:1px solid #cfd8e1;border-radius:14px;box-shadow:0 10px 30px #0003;display:none;overflow:hidden}
-  .menu div{padding:10px 26px;font-size:19px}
+  .menu div{padding:10px 30px;font-size:26px}
   .menu .pick{background:#3fa9f5;color:#fff}
 </style>
 <div class="stage">
   <div class="side">
     <h1>💣 LKND Ghost Text</h1>
-    <p>Self-destructing LinkedIn messages.</p>
+    <p>A creative plug-in on top of LinkedIn.</p>
     <div class="step" id="step">Type a message…</div>
   </div>
   <div class="win">
@@ -56,30 +56,33 @@
   </div>
 </div>
 <script>
+// The whole frame is a pure function of time t (ms), so the card can be rendered frame by frame:
+// docs/demo.html?t=2500 draws one still; without ?t it loops in real time.
 const $ = (id) => document.getElementById(id);
 const TEXT = 'Q3 draft: revenue up 18%. Keep it between us.';
 const TAG = 'This message will self-destruct in 20 seconds. 💣';
-const at = (ms, fn) => setTimeout(fn, ms);
-let i = 0;
-const typer = setInterval(() => { $('typed').textContent = TEXT.slice(0, ++i); if (i >= TEXT.length) clearInterval(typer); }, 22);
-at(1200, () => { $('step').innerHTML = 'Click <b>💣</b> and pick a timer'; $('bomb').classList.add('hot'); $('menu').style.display = 'block'; });
-at(1700, () => $('m20').classList.add('pick'));
-at(2100, () => {
-  $('menu').style.display = 'none'; $('bomb').classList.remove('hot'); $('typed').textContent = '';
-  $('body').innerHTML = TEXT + '<span class="tag">' + TAG + '</span>';
-  $('me').style.display = 'block'; $('ring').style.display = 'block';
-  $('step').innerHTML = 'Sent. A countdown ring shows on your side';
-  const t0 = performance.now(), dur = 2400;
-  (function tick(now) {
-    const f = Math.min(1, (now - t0) / dur);
-    $('arc').setAttribute('stroke-dashoffset', String(125.7 * f));
-    $('sec').textContent = String(Math.ceil(20 * (1 - f)));
-    if (f < 1) requestAnimationFrame(tick);
-  })(t0);
-});
-at(4600, () => {
-  $('ring').style.display = 'none'; $('me').classList.add('boom');
-  $('body').textContent = '💬💣💨'; $('ed').style.display = 'inline';
-  $('step').innerHTML = 'At zero your own message becomes <b>💬💣💨</b>';
-});
+const MENU = 1200, PICK = 1700, SEND = 2100, BOOM = 4600, LOOP = 6500, COUNT = BOOM - SEND;
+function render(t) {
+  const typing = t < SEND, menu = t >= MENU && t < SEND, sent = t >= SEND, boom = t >= BOOM;
+  $('typed').textContent = typing ? TEXT.slice(0, Math.floor(t / 22)) : '';
+  $('bomb').classList.toggle('hot', menu);
+  $('menu').style.display = menu ? 'block' : 'none';
+  $('m20').classList.toggle('pick', t >= PICK);
+  $('me').style.display = sent ? 'block' : 'none';
+  $('ring').style.display = sent && !boom ? 'block' : 'none';
+  $('ed').style.display = boom ? 'inline' : 'none';
+  $('me').style.background = boom && t < BOOM + 250 ? '#ff6b6b' : '';
+  $('me').style.transform = boom && t < BOOM + 250 ? 'scale(1.1)' : '';
+  if (boom) $('body').textContent = '💬💣💨';
+  else if (sent) $('body').innerHTML = TEXT + '<span class="tag">' + TAG + '</span>';
+  const f = Math.min(1, Math.max(0, (t - SEND) / COUNT));
+  $('arc').setAttribute('stroke-dashoffset', String(125.7 * f));
+  $('sec').textContent = String(Math.ceil(20 * (1 - f)));
+  $('step').innerHTML = boom ? 'At zero your own message becomes <b>💬💣💨</b>'
+    : sent ? 'Sent. A countdown ring shows on your side'
+    : menu ? 'Click <b>💣</b> and pick a timer' : 'Type a message…';
+}
+const fixed = new URLSearchParams(location.search).get('t');
+if (fixed !== null) render(Number(fixed));
+else { const t0 = performance.now(); (function tick(now) { render((now - t0) % LOOP); requestAnimationFrame(tick); })(t0); }
 </script>

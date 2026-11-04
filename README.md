@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/header.svg" alt="LKND Ghost Text: self-destructing LinkedIn messages" width="100%"></p>
+<p align="center"><img src="docs/header.svg" alt="LKND Ghost Text: build on top of what works. A creative plug-in experiment by Mauricio Moya." width="100%"></p>
 
 # 💣 LKND Ghost Text
 
@@ -8,7 +8,13 @@
 [![Chrome MV3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](extension/manifest.json)
 [![Tests](https://img.shields.io/badge/tests-73%20passing-brightgreen.svg)](test/)
 
-<p align="center"><img src="assets/demo.gif" width="720" alt="Animation: type a message, click the bomb, pick 20s; the message goes out with a self-destruct line and a countdown ring, and at zero it turns into 💬💣💨 (Edited)."></p>
+<p align="center"><img src="assets/demo.gif" width="860" alt="Animation: type a message, click the bomb, pick 20s; the message goes out with a self-destruct line and a countdown ring, and at zero it turns into 💬💣💨 (Edited)."></p>
+
+**Why this exists.** It is a playful build, not a messaging best practice (other chat tools
+already have disappearing messages). The point is the craft: take a product that already works,
+find the gap, and add a new feature on top of it with a small, tested plug-in, without touching
+its servers or asking for passwords. The joke makes the demo memorable; the method works for any
+tool your team already uses.
 
 A Chrome extension that sends self-destructing LinkedIn messages. Click 💣 next to send and pick
 **20s / 1m / 5m / 30m**. The message goes out with the line
@@ -66,9 +72,12 @@ Tests use `node:test` and jsdom against a fixture recorded from the live page
 (`docs/DOM_NOTES.md`). All LinkedIn selectors live in `extension/lib/dom.js` (`SEL`), so a markup
 change is a one-line fix.
 
-## Need a plug-in?
+## Need a plug-in built on top of a tool that already works?
 
-Need a plug-in built on top of a tool that already works? I build browser extensions that add the missing feature to software your team already uses. See [maumoya.github.io](https://maumoya.github.io/#hire).
+This repo is a creativity exercise in plug-in development. The same approach works for any web
+tool your team already relies on: a CRM, an ERP, a support desk, an internal portal. I scope the
+missing feature, build it as a small, tested, private-by-design extension, and ship it.
+See [maumoya.github.io](https://maumoya.github.io/#hire).
 
 ## License
 
