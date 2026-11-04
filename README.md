@@ -66,6 +66,10 @@ Tests use `node:test` and jsdom against a fixture recorded from the live page
 (`docs/DOM_NOTES.md`). All LinkedIn selectors live in `extension/lib/dom.js` (`SEL`), so a markup
 change is a one-line fix.
 
+## Need a plug-in?
+
+Need a plug-in built on top of a tool that already works? I build browser extensions that add the missing feature to software your team already uses. See [maumoya.github.io](https://maumoya.github.io/#hire).
+
 ## License
 
 [MIT](LICENSE). Security reports: see [SECURITY.md](SECURITY.md).
