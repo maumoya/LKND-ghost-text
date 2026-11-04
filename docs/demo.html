@@ -1,0 +1,85 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>LKND Ghost Text demo</title>
+<!-- Source of the README demo card (assets/demo.gif). An animation of the extension's flow,
+     drawn in a neutral chat style. Regenerate: make_demo.sh http://localhost:PORT/docs/demo.html assets/demo.gif -->
+<style>
+  html,body{margin:0;height:100%;background:#0b1f33;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:#e6f3ff}
+  .stage{display:flex;height:100%;align-items:center;justify-content:center;gap:56px;padding:0 60px;box-sizing:border-box}
+  .side{width:330px}
+  .side h1{font-size:44px;margin:0 0 12px;color:#fff}
+  .side p{font-size:22px;color:#b8d4ee;margin:0 0 10px;line-height:1.35}
+  .step{font-size:22px;color:#7fa6c9;margin-top:26px;min-height:60px;transition:color .3s}
+  .step b{color:#fff}
+  .win{width:640px;height:600px;background:#fff;border-radius:22px;box-shadow:0 20px 60px #0008;display:flex;flex-direction:column;overflow:hidden;color:#1d2226}
+  .head{padding:18px 24px;border-bottom:1px solid #e3e8ee;font-weight:700;font-size:20px;display:flex;gap:12px;align-items:center}
+  .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#7fb3e6,#3f7fbf)}
+  .list{flex:1;padding:22px 24px;display:flex;flex-direction:column;gap:14px;justify-content:flex-end}
+  .msg{max-width:78%;padding:12px 16px;border-radius:16px;font-size:19px;line-height:1.35}
+  .them{background:#eef2f6;align-self:flex-start}
+  .me{background:#3fa9f5;color:#fff;align-self:flex-end;position:relative;display:none}
+  .me .tag{display:block;font-size:15px;opacity:.9;margin-top:6px}
+  .me.boom{animation:boom .5s}
+  .edited{font-size:13px;opacity:.8;margin-left:8px;display:none}
+  @keyframes boom{0%{transform:scale(1)}40%{transform:scale(1.12);background:#ff6b6b}100%{transform:scale(1)}}
+  .ring{position:absolute;left:-62px;top:50%;transform:translateY(-50%);width:48px;height:48px;display:none}
+  .ring text{font:700 16px sans-serif;fill:#1d2226}
+  .comp{border-top:1px solid #e3e8ee;padding:16px 20px;display:flex;gap:12px;align-items:center;position:relative}
+  .box{flex:1;min-height:30px;border:1px solid #cfd8e1;border-radius:12px;padding:10px 14px;font-size:19px}
+  .caret{display:inline-block;width:2px;height:20px;background:#1d2226;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .bomb{font-size:28px;width:52px;height:52px;border-radius:50%;border:2px solid #cfd8e1;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .bomb.hot{border-color:#ff6b6b;transform:scale(1.15);box-shadow:0 0 0 6px #ff6b6b33}
+  .send{background:#3fa9f5;color:#fff;border-radius:20px;padding:10px 18px;font-weight:700;font-size:17px}
+  .menu{position:absolute;right:90px;bottom:84px;background:#fff;border:1px solid #cfd8e1;border-radius:14px;box-shadow:0 10px 30px #0003;display:none;overflow:hidden}
+  .menu div{padding:10px 26px;font-size:19px}
+  .menu .pick{background:#3fa9f5;color:#fff}
+</style>
+<div class="stage">
+  <div class="side">
+    <h1>💣 LKND Ghost Text</h1>
+    <p>Self-destructing LinkedIn messages.</p>
+    <div class="step" id="step">Type a message…</div>
+  </div>
+  <div class="win">
+    <div class="head"><div class="av"></div>Alex Rivera</div>
+    <div class="list">
+      <div class="msg them">Can you share the numbers before Friday?</div>
+      <div class="msg me" id="me"><svg class="ring" id="ring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="#e3e8ee" stroke-width="5"/><circle id="arc" cx="24" cy="24" r="20" fill="none" stroke="#ff6b6b" stroke-width="5" stroke-linecap="round" stroke-dasharray="125.7" stroke-dashoffset="0" transform="rotate(-90 24 24)"/><text id="sec" x="24" y="30" text-anchor="middle">20</text></svg><span id="body"></span><span class="edited" id="ed">(Edited)</span></div>
+    </div>
+    <div class="comp">
+      <div class="box" id="box"><span id="typed"></span><span class="caret"></span></div>
+      <div class="bomb" id="bomb">💣</div>
+      <div class="send">Send</div>
+      <div class="menu" id="menu"><div id="m20">20s</div><div>1m</div><div>5m</div><div>30m</div></div>
+    </div>
+  </div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const TEXT = 'Q3 draft: revenue up 18%. Keep it between us.';
+const TAG = 'This message will self-destruct in 20 seconds. 💣';
+const at = (ms, fn) => setTimeout(fn, ms);
+let i = 0;
+const typer = setInterval(() => { $('typed').textContent = TEXT.slice(0, ++i); if (i >= TEXT.length) clearInterval(typer); }, 22);
+at(1200, () => { $('step').innerHTML = 'Click <b>💣</b> and pick a timer'; $('bomb').classList.add('hot'); $('menu').style.display = 'block'; });
+at(1700, () => $('m20').classList.add('pick'));
+at(2100, () => {
+  $('menu').style.display = 'none'; $('bomb').classList.remove('hot'); $('typed').textContent = '';
+  $('body').innerHTML = TEXT + '<span class="tag">' + TAG + '</span>';
+  $('me').style.display = 'block'; $('ring').style.display = 'block';
+  $('step').innerHTML = 'Sent. A countdown ring shows on your side';
+  const t0 = performance.now(), dur = 2400;
+  (function tick(now) {
+    const f = Math.min(1, (now - t0) / dur);
+    $('arc').setAttribute('stroke-dashoffset', String(125.7 * f));
+    $('sec').textContent = String(Math.ceil(20 * (1 - f)));
+    if (f < 1) requestAnimationFrame(tick);
+  })(t0);
+});
+at(4600, () => {
+  $('ring').style.display = 'none'; $('me').classList.add('boom');
+  $('body').textContent = '💬💣💨'; $('ed').style.display = 'inline';
+  $('step').innerHTML = 'At zero your own message becomes <b>💬💣💨</b>';
+});
+</script>

@@ -8,6 +8,8 @@
 [![Chrome MV3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](extension/manifest.json)
 [![Tests](https://img.shields.io/badge/tests-73%20passing-brightgreen.svg)](test/)
 
+<p align="center"><img src="assets/demo.gif" width="720" alt="Animation: type a message, click the bomb, pick 20s; the message goes out with a self-destruct line and a countdown ring, and at zero it turns into 💬💣💨 (Edited)."></p>
+
 A Chrome extension that sends self-destructing LinkedIn messages. Click 💣 next to send and pick
 **20s / 1m / 5m / 30m**. The message goes out with the line
 `This message will self-destruct in N seconds/minutes. 💣`, and a countdown ring shows on your
