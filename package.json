@@ -1,0 +1,10 @@
+{
+  "name": "linkedin-bomb",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-destruct messages for LinkedIn messaging (owner-only Chrome extension).",
+  "license": "UNLICENSED",
+  "author": "Mauricio Alonso Moya Tapia",
+  "scripts": { "test": "node --test \"test/*.test.js\"" },
+  "engines": { "node": ">=20" }
+}
