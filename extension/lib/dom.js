@@ -14,7 +14,9 @@
     composer: '.msg-form__contenteditable',
     sendButton: '.msg-form__send-button',
     footer: '.msg-form__footer',
-    attachment: '[class*="attachment-preview"], [class*="msg-form__attachment"], .msg-form img:not(.msg-form__footer img)',
+    // Live layout keeps an empty drag-and-drop zone, an empty list and hidden file inputs in
+    // every form: only a preview or a non-empty list means a real attachment.
+    attachment: '[class*="attachment-preview"], .msg-form__attachment-list > *',
     editForm: 'form.msg-edit-form__base-form',
     editSave: 'button.msg-edit-form__save-button',
   };
@@ -56,6 +58,7 @@
     if (!p) return null;
     const clone = p.cloneNode(true);
     clone.querySelectorAll(SEL.edited).forEach((s) => s.remove());
+    clone.querySelectorAll('br').forEach((b) => b.replaceWith('\n'));
     return norm(clone.textContent);
   }
 
@@ -144,7 +147,9 @@
     if (!ed || !save) return { ok: false, reason: 'edit_control_missing' };
     // Only replace text we can prove belongs to the bombed message.
     if (loose(editorText(ed)) !== loose(bodyText(el))) {
-      ed.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true }));
+      // Escape does not close LinkedIn's edit form (seen live); click its Cancel button.
+      const cancel = [...form.querySelectorAll('button')].find((b) => norm(b.textContent) === 'Cancel');
+      if (cancel) cancel.click();
       return { ok: false, reason: 'edit_mismatch' };
     }
     setEditable(doc, ed, text);

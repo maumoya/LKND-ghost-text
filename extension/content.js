@@ -88,6 +88,7 @@
         b.textContent = LABELS[s] || s + 's';
         b.addEventListener('click', (ev) => {
           ev.preventDefault();
+          ev.stopPropagation();
           menu.hidden = true;
           choose(s);
         });
@@ -95,12 +96,16 @@
       }
       btn.addEventListener('click', (ev) => {
         ev.preventDefault();
+        ev.stopPropagation();
         menu.hidden = !menu.hidden;
       });
       wrap.appendChild(menu);
       wrap.appendChild(btn);
       const anchor = footer.querySelector(LB.SEL.sendButton) || footer.querySelector('.msg-form__send-toggle');
-      if (anchor) anchor.parentNode.insertBefore(wrap, anchor);
+      // Live, the send toggle sits inside LinkedIn's hoverable trigger: go outside it, or a 💣
+      // click also opens LinkedIn's send-options dropdown.
+      const spot = anchor && (anchor.closest('.artdeco-hoverable-trigger') || anchor);
+      if (spot && footer.contains(spot)) spot.parentNode.insertBefore(wrap, spot);
       else footer.appendChild(wrap);
     }
 

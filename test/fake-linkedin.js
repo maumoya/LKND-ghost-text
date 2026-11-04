@@ -27,7 +27,20 @@ function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false, wrongEdit = 
       form.classList.add('msg-edit-form__base-form');
       const body = item.querySelector('p.msg-s-event-listitem__body').cloneNode(true);
       body.querySelectorAll('span.pl1').forEach((s) => s.remove());
-      form.querySelector('.msg-form__contenteditable').innerHTML = '<p>' + (wrongEdit ? 'some other message' : body.textContent) + '</p>';
+      body.querySelectorAll('br').forEach((b) => b.replaceWith('\n'));
+      const lines = wrongEdit ? ['some other message'] : body.textContent.split('\n');
+      form.querySelector('.msg-form__contenteditable').innerHTML = lines.map((l) => '<p>' + l + '</p>').join('');
+      const cancel = doc.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'artdeco-button--secondary';
+      cancel.textContent = 'Cancel';
+      cancel.addEventListener('click', () => {
+        form.classList.remove('msg-edit-form__base-form');
+        form.querySelector('.msg-form__contenteditable').innerHTML = '<p><br></p>';
+        cancel.remove();
+        save.remove();
+      });
+      form.appendChild(cancel);
       const save = doc.createElement('button');
       save.type = 'button';
       save.className = 'msg-edit-form__save-button';
@@ -50,6 +63,7 @@ function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false, wrongEdit = 
       }
       ed.innerHTML = '<p><br></p>';
       form.classList.remove('msg-edit-form__base-form');
+      [...form.querySelectorAll('button')].filter((b) => b.textContent === 'Cancel').forEach((b) => b.remove());
       save.remove();
     }
   });
