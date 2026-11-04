@@ -53,6 +53,34 @@ function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false } = {}) {
       save.remove();
     }
   });
+  // Sending, the owner's Enter mode plus a send button when one exists: post the composer
+  // text as a new own message (paragraphs joined by newlines) and clear the composer.
+  let n = 0;
+  const sent = [];
+  function post(form) {
+    const ed = form.querySelector('.msg-form__contenteditable');
+    const ps = [...ed.querySelectorAll('p')];
+    const text = (ps.length ? ps.map((p) => p.textContent).join('\n') : ed.textContent).trim();
+    sent.push(text);
+    const li = doc.createElement('li');
+    li.innerHTML = '<div class="msg-s-event-listitem"><div class="msg-s-event-listitem__message-bubble">' +
+      '<p class="msg-s-event-listitem__body"></p></div>' +
+      '<button class="msg-s-event-listitem__options-trigger" type="button"></button></div>';
+    const item = li.firstChild;
+    item.setAttribute('data-event-urn', 'urn:li:msg_message:(urn:li:fsd_profile:OWNER,2-NEW' + ++n + ')');
+    item.querySelector('p').textContent = text;
+    doc.querySelector('.msg-s-message-list-content').appendChild(li);
+    ed.innerHTML = '<p><br></p>';
+  }
+  doc.addEventListener('keydown', (ev) => {
+    const ed = ev.target.closest && ev.target.closest('.msg-form__contenteditable');
+    if (ed && ev.key === 'Enter' && !ev.shiftKey && !ed.closest('.msg-edit-form__base-form')) post(ed.closest('form'));
+  });
+  doc.addEventListener('click', (ev) => {
+    const b = ev.target.closest('.msg-form__send-button');
+    if (b) post(b.closest('form'));
+  });
+  doc._sent = sent;
   return doc;
 }
 module.exports = { wireFakeLinkedIn };

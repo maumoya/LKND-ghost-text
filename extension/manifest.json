@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Bomb",
+  "version": "0.1.0",
+  "description": "Self-destructing LinkedIn messages: a timer turns your own message into 💬💣💨.",
+  "permissions": ["storage", "alarms", "tabs"],
+  "host_permissions": ["https://www.linkedin.com/messaging/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/messaging/*"],
+      "js": ["lib/timers.js", "lib/bombs.js", "lib/ring.js", "lib/dom.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LinkedIn Bomb",
+    "default_icon": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  },
+  "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+}

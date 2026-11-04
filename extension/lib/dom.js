@@ -138,7 +138,7 @@
     return ok ? { ok: true } : { ok: false, reason: 'verify_failed' };
   }
 
-  const api = { SEL, norm, editMessage, findComposer, findSendButton, hasAttachment, ownMessages, messageKeyOf, matchMessage };
+  const api = { SEL, norm, bodyText, waitFor, setEditable, editMessage, findComposer, findSendButton, hasAttachment, ownMessages, messageKeyOf, matchMessage };
   root.LB = Object.assign(root.LB || {}, api);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);
