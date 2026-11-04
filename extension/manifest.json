@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LKND Ghost Text",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Self-destructing LinkedIn messages: a timer turns your own message into 💬💣💨.",
   "permissions": ["storage", "alarms", "tabs"],
   "host_permissions": ["https://www.linkedin.com/messaging/*"],
