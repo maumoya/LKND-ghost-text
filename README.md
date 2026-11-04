@@ -27,7 +27,9 @@ Owner and author: Mauricio Alonso Moya Tapia. Private, single-user tool.
 - **If LinkedIn changes its page, it fails loudly instead of guessing.** You get a red badge and a
   popup entry with the reason. It only edits a message it can match exactly. If two of your
   messages have the same text, it refuses to edit either.
-- Text only. If the composer has an attachment, 💣 does nothing.
+- Text only. If the composer has an attachment, 💣 sends nothing and says why on the page.
+- If a bomb could not be sent, you get a note on the page and a red badge entry; your text stays in
+  the box.
 
 ## Privacy and safety
 

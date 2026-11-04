@@ -1,6 +1,6 @@
 // Emulates LinkedIn's live edit flow on the fixture (as recorded in docs/DOM_NOTES.md):
 // options trigger -> open dropdown -> "Edit" -> main form turns into edit form -> Save writes body + "(Edited)".
-function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false } = {}) {
+function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false, wrongEdit = false, noSend = false, rerenderOnSend = false } = {}) {
   doc.addEventListener('click', (ev) => {
     const trig = ev.target.closest('.msg-s-event-listitem__options-trigger');
     if (trig) {
@@ -27,7 +27,7 @@ function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false } = {}) {
       form.classList.add('msg-edit-form__base-form');
       const body = item.querySelector('p.msg-s-event-listitem__body').cloneNode(true);
       body.querySelectorAll('span.pl1').forEach((s) => s.remove());
-      form.querySelector('.msg-form__contenteditable').innerHTML = '<p>' + body.textContent + '</p>';
+      form.querySelector('.msg-form__contenteditable').innerHTML = '<p>' + (wrongEdit ? 'some other message' : body.textContent) + '</p>';
       const save = doc.createElement('button');
       save.type = 'button';
       save.className = 'msg-edit-form__save-button';
@@ -58,6 +58,7 @@ function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false } = {}) {
   let n = 0;
   const sent = [];
   function post(form) {
+    if (noSend) return;
     const ed = form.querySelector('.msg-form__contenteditable');
     const ps = [...ed.querySelectorAll('p')];
     const text = (ps.length ? ps.map((p) => p.textContent).join('\n') : ed.textContent).trim();
@@ -69,8 +70,11 @@ function wireFakeLinkedIn(doc, { noEdit = false, breakSave = false } = {}) {
     const item = li.firstChild;
     item.setAttribute('data-event-urn', 'urn:li:msg_message:(urn:li:fsd_profile:OWNER,2-NEW' + ++n + ')');
     item.querySelector('p').textContent = text;
-    doc.querySelector('.msg-s-message-list-content').appendChild(li);
+    const list = doc.querySelector('.msg-s-message-list-content');
+    list.appendChild(li);
     ed.innerHTML = '<p><br></p>';
+    // LinkedIn re-renders the list: every message element is replaced by a fresh copy.
+    if (rerenderOnSend) [...list.children].forEach((c) => c.replaceWith(c.cloneNode(true)));
   }
   doc.addEventListener('keydown', (ev) => {
     const ed = ev.target.closest && ev.target.closest('.msg-form__contenteditable');

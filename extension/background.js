@@ -77,17 +77,43 @@ if (typeof importScripts === 'function') importScripts('lib/timers.js', 'lib/bom
       return { ok: false, reason: 'no_content_script' };
     }
 
+    const WATCHDOG = 'lb-watchdog';
+
+    // Close a tab this extension opened for a bomb and forget it (survives worker restarts).
+    async function closeCreatedTab(id) {
+      const tabId = ((await getBombs())[id] || {}).createdTabId;
+      if (tabId == null) return;
+      try { await chrome.tabs.remove(tabId); } catch (_) { /* already closed */ }
+      await mutate((s) => { if (s.bombs[id]) delete s.bombs[id].createdTabId; });
+    }
+
+    // Runs on every worker start and every minute: fire overdue bombs a dead worker dropped,
+    // close tabs a dead worker left open, keep the watchdog alarm alive.
+    async function sweep() {
+      chrome.alarms.create(WATCHDOG, { periodInMinutes: 1 });
+      for (const b of Object.values(await getBombs())) {
+        if (b.status === 'pending') {
+          if (b.fireAt > now()) chrome.alarms.create(b.id, { when: b.fireAt });
+          else await onAlarm(b.id);
+        } else if (b.createdTabId != null && !firing.has(b.id)) {
+          await closeCreatedTab(b.id);
+        }
+      }
+      await updateBadge();
+    }
+
     async function onAlarm(id) {
+      if (id === WATCHDOG) return sweep();
       if (firing.has(id)) return;
       firing.add(id);
-      let createdTab = null;
       try {
         const bomb = (await getBombs())[id];
         if (!bomb || bomb.status !== 'pending') return;
         if (T.lateFireDecision(now(), bomb.sentAt) === 'missed') return await finish(id, 'missed', 'late');
         let tab = await findTab(bomb.conversationUrl);
         if (!tab) {
-          tab = createdTab = await chrome.tabs.create({ url: bomb.conversationUrl, active: false });
+          tab = await chrome.tabs.create({ url: bomb.conversationUrl, active: false });
+          await mutate((s) => { if (s.bombs[id]) s.bombs[id].createdTabId = tab.id; });
           if (!(await waitComplete(tab.id))) return await finish(id, 'failed', 'tab_load_failed');
         }
         const r = await explodeIn(tab.id, bomb);
@@ -95,19 +121,12 @@ if (typeof importScripts === 'function') importScripts('lib/timers.js', 'lib/bom
       } catch (e) {
         await finish(id, 'failed', 'error: ' + (e && e.message ? e.message : String(e)));
       } finally {
-        if (createdTab) { try { await chrome.tabs.remove(createdTab.id); } catch (_) { /* already closed */ } }
+        try { await closeCreatedTab(id); } catch (_) { /* best effort; the next sweep retries */ }
         firing.delete(id);
       }
     }
 
-    async function onStartup() {
-      const pending = Object.values(await getBombs()).filter((b) => b.status === 'pending');
-      for (const b of pending) {
-        if (b.fireAt > now()) chrome.alarms.create(b.id, { when: b.fireAt });
-        else await onAlarm(b.id);
-      }
-      await updateBadge();
-    }
+    const onStartup = sweep;
 
     async function handleMessage(msg) {
       switch (msg && msg.type) {
@@ -115,6 +134,17 @@ if (typeof importScripts === 'function') importScripts('lib/timers.js', 'lib/bom
           const b = msg.bomb;
           await mutate((s) => { s.bombs[b.id] = b; });
           chrome.alarms.create(b.id, { when: b.fireAt });
+          chrome.alarms.create(WATCHDOG, { periodInMinutes: 1 });
+          return { ok: true };
+        }
+        case 'sendFailed': {
+          // A bomb that never went out: recorded as failed so the badge and popup show it.
+          const id = 'f-' + now() + '-' + Math.random().toString(36).slice(2, 8);
+          const preview = String(msg.preview || '').slice(0, 40);
+          await mutate((s) => {
+            s.bombs[id] = { id, status: 'failed', reason: String(msg.reason || 'unknown'), sentAt: now(), endedAt: now(), key: { text: preview } };
+          });
+          await updateBadge();
           return { ok: true };
         }
         case 'result':
@@ -144,7 +174,7 @@ if (typeof importScripts === 'function') importScripts('lib/timers.js', 'lib/bom
       }
     }
 
-    return { handleMessage, onAlarm, onStartup, updateBadge, getBombs };
+    return { handleMessage, onAlarm, onStartup, sweep, updateBadge, getBombs };
   }
 
   if (typeof module !== 'undefined' && module.exports) {
@@ -154,6 +184,8 @@ if (typeof importScripts === 'function') importScripts('lib/timers.js', 'lib/bom
     root.chrome.alarms.onAlarm.addListener((a) => { bg.onAlarm(a.name); });
     root.chrome.runtime.onStartup.addListener(() => { bg.onStartup(); });
     root.chrome.runtime.onInstalled.addListener(() => { bg.onStartup(); });
+    // Every worker start (not only browser start): an MV3 worker can die mid-countdown.
+    bg.sweep();
     root.chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
       bg.handleMessage(msg).then(reply, (e) => reply({ ok: false, reason: String(e) }));
       return true;

@@ -18,12 +18,12 @@
     '.lb-menu button{border:0;background:#f3f2ef;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600}',
     '.lb-menu button:hover{background:#e8590c;color:#fff}',
     '.lb-ring{margin-left:6px;vertical-align:middle;flex:none}',
+    '.lb-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;',
+    'padding:10px 14px;border-radius:8px;font:14px/1.4 system-ui,sans-serif;z-index:10000;max-width:420px}',
   ].join('');
 
   function composerText(ed) {
-    const ps = [...ed.querySelectorAll('p')];
-    const t = ps.length ? ps.map((p) => p.textContent).join('\n') : ed.textContent;
-    return LB.norm(t);
+    return LB.editorText(ed);
   }
 
   function conversationUrl(href) {
@@ -126,23 +126,57 @@
       }
     }
 
+    const SAY = {
+      selector_missing: 'LinkedIn Bomb: could not find the message box. Nothing was sent.',
+      empty: 'LinkedIn Bomb: type a message first.',
+      attachment: 'LinkedIn Bomb: text only. Remove the attachment to send a bomb.',
+      send_not_seen: 'LinkedIn Bomb: the message did not appear as sent. Your text is back in the box, no timer started.',
+    };
+
+    function toast(text) {
+      addStyle();
+      const old = doc.querySelector('.lb-toast');
+      if (old) old.remove();
+      const t = doc.createElement('div');
+      t.className = 'lb-toast';
+      t.setAttribute('role', 'alert');
+      t.textContent = text;
+      doc.body.appendChild(t);
+      later(() => t.remove(), 6000);
+    }
+
+    // A send that did not happen is not silent: toast on the page, failed entry on the badge.
+    function refuse(reason, text) {
+      toast(SAY[reason] || 'LinkedIn Bomb: ' + reason);
+      if (reason !== 'empty') send({ type: 'sendFailed', reason, preview: (text || '').split('\n')[0].slice(0, 40) });
+      return { ok: false, reason };
+    }
+
+    const urnOf = (e) => e.getAttribute('data-event-urn');
+
     async function choose(seconds) {
       const ed = LB.findComposer(doc);
-      if (!ed) return { ok: false, reason: 'selector_missing' };
+      if (!ed) return refuse('selector_missing');
       const text = composerText(ed);
-      if (!text) return { ok: false, reason: 'empty' };
-      if (LB.hasAttachment(doc)) return { ok: false, reason: 'attachment' };
+      if (!text) return refuse('empty');
+      if (LB.hasAttachment(doc)) return refuse('attachment', text);
       const tag = LB.tagLine(seconds);
-      const before = new Set(LB.ownMessages(doc));
+      // Messages are told apart by URN: LinkedIn may re-render the list, so element identity lies.
+      const before = new Set(LB.ownMessages(doc).map(urnOf));
       LB.setEditable(doc, ed, text + '\n' + tag);
       const sendBtn = LB.findSendButton(doc);
       if (sendBtn) sendBtn.click();
       else pressEnter(ed);
-      const el = await LB.waitFor(
-        () => LB.ownMessages(doc).find((e) => !before.has(e) && (LB.bodyText(e) || '').endsWith(tag)),
-        waitMs,
-      );
-      if (!el) return { ok: false, reason: 'send_not_seen' };
+      const el = await LB.waitFor(() => {
+        const fresh = LB.ownMessages(doc).filter((e) => urnOf(e) && !before.has(urnOf(e)) && (LB.bodyText(e) || '').endsWith(tag));
+        return fresh[fresh.length - 1];
+      }, waitMs);
+      if (!el) {
+        // Still unsent in the box: put the owner's text back without the tag line.
+        const cur = LB.findComposer(doc);
+        if (cur && composerText(cur).endsWith(tag)) LB.setEditable(doc, cur, text);
+        return refuse('send_not_seen', text);
+      }
       const bomb = LB.newBomb({ conversationUrl: url(), key: LB.messageKeyOf(el), sentAt: now(), seconds });
       await send({ type: 'arm', bomb });
       later(() => send({ type: 'fireNow', id: bomb.id }), seconds * 1000);
@@ -151,8 +185,19 @@
     }
 
     async function explode(bomb) {
-      await LB.waitFor(() => doc.querySelector(LB.SEL.item), waitMs);
-      const m = LB.matchMessage(doc, bomb.key || {});
+      const key = bomb.key || {};
+      // Already exploded (a retry after the edit landed): that is success, not not_found.
+      const done = () => {
+        const el = key.urn && LB.ownMessages(doc).find((e) => urnOf(e) === key.urn);
+        return el && LB.bodyText(el) === LB.EXPLOSION_TEXT;
+      };
+      // A freshly opened tab renders messages progressively: wait until the target is there.
+      const m = await LB.waitFor(() => {
+        if (done()) return { done: true };
+        const r = LB.matchMessage(doc, key);
+        return r.ok || r.reason === 'ambiguous' ? r : null;
+      }, waitMs) || LB.matchMessage(doc, key);
+      if (m.done) return { ok: true };
       if (!m.ok) return { ok: false, reason: m.reason };
       const ring = m.el.querySelector('svg.lb-ring');
       if (ring) ring.remove();

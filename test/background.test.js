@@ -17,7 +17,7 @@ async function armed(bg, b) { await bg.handleMessage({ type: 'arm', bomb: b }); 
 test('arm stores the bomb and creates one alarm at fireAt', async () => {
   const c = fakeChrome(); const bg = makeBackground(c, opts(0));
   const b = await armed(bg, bombAt(0));
-  assert.equal(c._alarms.size, 1);
+  assert.deepEqual([...c._alarms.keys()].sort(), [b.id, 'lb-watchdog'].sort()); // the bomb + the restart watchdog
   assert.equal(c._alarms.get(b.id).when, b.fireAt);
   assert.equal((await bg.getBombs())[b.id].status, 'pending');
 });

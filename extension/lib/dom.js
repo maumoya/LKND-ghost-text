@@ -23,6 +23,17 @@
     return String(t == null ? '' : t).replace(/\r\n/g, '\n').trim();
   }
 
+  // Compare text ignoring whitespace differences (nbsp, line-break shapes) between editor and bubble.
+  function loose(t) {
+    return norm(t).replace(/\s+/g, ' ');
+  }
+
+  // Text in a contenteditable: one line per paragraph.
+  function editorText(ed) {
+    const ps = [...ed.querySelectorAll('p')];
+    return norm(ps.length ? ps.map((p) => p.textContent).join('\n') : ed.textContent);
+  }
+
   function findComposer(doc) {
     return doc.querySelector(SEL.form + ' ' + SEL.composer) || doc.querySelector(SEL.composer);
   }
@@ -110,12 +121,16 @@
     const urn = el.getAttribute('data-event-urn');
     await delay(1000 + rand() * 2000);
 
+    // Refuse if LinkedIn is already mid-edit or a menu is open: the next steps could act on it.
+    if (doc.querySelector(SEL.editForm) || doc.querySelector(SEL.openMenu)) return { ok: false, reason: 'busy' };
     const trigger = el.querySelector(SEL.optionsTrigger);
     if (!trigger) return { ok: false, reason: 'edit_control_missing' };
     trigger.click();
+    // The only open menu now is the one this trigger opened (none was open before the click).
     const editItem = await waitFor(() => {
-      const menu = doc.querySelector(SEL.openMenu);
-      return menu && [...menu.querySelectorAll(SEL.menuItem)].find((i) => norm(i.textContent) === 'Edit');
+      const menus = doc.querySelectorAll(SEL.openMenu);
+      if (menus.length !== 1) return null;
+      return [...menus[0].querySelectorAll(SEL.menuItem)].find((i) => norm(i.textContent) === 'Edit');
     }, waitMs);
     if (!editItem) {
       if (typeof doc.body.click === 'function') doc.body.click();
@@ -127,6 +142,11 @@
     const ed = form && form.querySelector(SEL.composer);
     const save = form && form.querySelector(SEL.editSave);
     if (!ed || !save) return { ok: false, reason: 'edit_control_missing' };
+    // Only replace text we can prove belongs to the bombed message.
+    if (loose(editorText(ed)) !== loose(bodyText(el))) {
+      ed.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true }));
+      return { ok: false, reason: 'edit_mismatch' };
+    }
     setEditable(doc, ed, text);
     save.click();
 
@@ -138,7 +158,7 @@
     return ok ? { ok: true } : { ok: false, reason: 'verify_failed' };
   }
 
-  const api = { SEL, norm, bodyText, waitFor, setEditable, editMessage, findComposer, findSendButton, hasAttachment, ownMessages, messageKeyOf, matchMessage };
+  const api = { SEL, norm, loose, editorText, bodyText, waitFor, setEditable, editMessage, findComposer, findSendButton, hasAttachment, ownMessages, messageKeyOf, matchMessage };
   root.LB = Object.assign(root.LB || {}, api);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);
