@@ -70,7 +70,75 @@
     return { ok: false, reason: hits.length ? 'ambiguous' : 'not_found' };
   }
 
-  const api = { SEL, norm, findComposer, findSendButton, hasAttachment, ownMessages, messageKeyOf, matchMessage };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // Poll for fn() to be truthy: check now, then every 50 ms until waitMs.
+  async function waitFor(fn, waitMs) {
+    const end = Date.now() + waitMs;
+    for (;;) {
+      const v = fn();
+      if (v) return v;
+      if (Date.now() >= end) return null;
+      await sleep(50);
+    }
+  }
+
+  // Put text into a contenteditable the way LinkedIn's editor accepts it (verified live:
+  // selectAll + insertText). Fallback for environments without execCommand.
+  function setEditable(doc, ed, text) {
+    ed.focus && ed.focus();
+    let done = false;
+    try {
+      if (typeof doc.execCommand === 'function' && doc.execCommand('selectAll')) {
+        done = doc.execCommand('insertText', false, text);
+      }
+    } catch (_) { done = false; }
+    if (!done) {
+      ed.innerHTML = '';
+      const p = doc.createElement('p');
+      p.textContent = text;
+      ed.appendChild(p);
+      ed.dispatchEvent(new (doc.defaultView.InputEvent || doc.defaultView.Event)('input', { bubbles: true }));
+    }
+  }
+
+  // Edit the owner's own message `el` so its whole text becomes `text`.
+  async function editMessage(doc, el, text, opts = {}) {
+    const delay = opts.delay || sleep;
+    const rand = opts.rand || Math.random;
+    const waitMs = opts.waitMs == null ? 3000 : opts.waitMs;
+    const urn = el.getAttribute('data-event-urn');
+    await delay(1000 + rand() * 2000);
+
+    const trigger = el.querySelector(SEL.optionsTrigger);
+    if (!trigger) return { ok: false, reason: 'edit_control_missing' };
+    trigger.click();
+    const editItem = await waitFor(() => {
+      const menu = doc.querySelector(SEL.openMenu);
+      return menu && [...menu.querySelectorAll(SEL.menuItem)].find((i) => norm(i.textContent) === 'Edit');
+    }, waitMs);
+    if (!editItem) {
+      if (typeof doc.body.click === 'function') doc.body.click();
+      return { ok: false, reason: 'edit_control_missing' };
+    }
+    editItem.click();
+
+    const form = await waitFor(() => doc.querySelector(SEL.editForm), waitMs);
+    const ed = form && form.querySelector(SEL.composer);
+    const save = form && form.querySelector(SEL.editSave);
+    if (!ed || !save) return { ok: false, reason: 'edit_control_missing' };
+    setEditable(doc, ed, text);
+    save.click();
+
+    const want = norm(text);
+    const ok = await waitFor(() => {
+      const cur = (urn && doc.querySelector(SEL.item + '[data-event-urn="' + urn + '"]')) || el;
+      return bodyText(cur) === want;
+    }, waitMs);
+    return ok ? { ok: true } : { ok: false, reason: 'verify_failed' };
+  }
+
+  const api = { SEL, norm, editMessage, findComposer, findSendButton, hasAttachment, ownMessages, messageKeyOf, matchMessage };
   root.LB = Object.assign(root.LB || {}, api);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);
