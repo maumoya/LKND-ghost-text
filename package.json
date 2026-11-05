@@ -1,17 +1,21 @@
 {
   "name": "lknd-ghost-text",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Self-destruct messages for LinkedIn messaging (owner-only Chrome extension).",
   "license": "MIT",
   "author": "Mauricio Alonso Moya Tapia",
   "scripts": {
-    "test": "node --test \"test/*.test.js\""
+    "test": "node --test \"test/*.test.js\"",
+    "lint": "eslint --max-warnings 0 ."
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "eslint": "9.39.1",
+    "globals": "16.5.0",
     "jsdom": "30.1.3"
   }
 }

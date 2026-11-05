@@ -7,6 +7,9 @@
 [![Privacy: no network calls](https://img.shields.io/badge/privacy-no%20network%20calls-success.svg)](SECURITY.md)
 [![Chrome MV3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](extension/manifest.json)
 [![Tests](https://img.shields.io/badge/tests-73%20passing-brightgreen.svg)](test/)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/maumoya/LKND-ghost-text/badge)](https://scorecard.dev/viewer/?uri=github.com/maumoya/LKND-ghost-text)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16348/badge)](https://www.bestpractices.dev/projects/16348)
+[![CI](https://github.com/maumoya/LKND-ghost-text/actions/workflows/test.yml/badge.svg)](https://github.com/maumoya/LKND-ghost-text/actions/workflows/test.yml)
 
 <p align="center"><img src="assets/demo.gif" width="860" alt="Animation: type a message, click the bomb, pick 20s; the message goes out with a self-destruct line and a countdown ring, and at zero it turns into 💬💣💨 (Edited)."></p>
 
