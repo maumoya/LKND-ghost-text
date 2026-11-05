@@ -1,4 +1,4 @@
-# Test: the full extension test suite (node --test + jsdom) on every push and PR. No network at runtime.
+# Test: ESLint (zero warnings) and the full extension test suite (node --test + jsdom) on every push and PR. No network at runtime.
 name: Test
 
 on:
@@ -21,6 +21,9 @@ jobs:
 
       - name: Install
         run: npm ci --ignore-scripts
+
+      - name: Lint (warnings fail the build)
+        run: npm run lint
 
       - name: Test
         run: npm test
